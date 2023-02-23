@@ -17,12 +17,13 @@ export const useHttp = () => {
 
             const data = await response.json();
 
-            setLoading(false);
+            setTimeout(() => {
+                setLoading(false);
+            }, 400)
             return data;
         } catch(e) {
             console.log(1)
-
-            setLoading(false);
+                setLoading(false);
             // setError(e.message);
             setError(e.message);
             throw e;

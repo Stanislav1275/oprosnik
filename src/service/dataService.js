@@ -18,29 +18,35 @@ export const dataService = () => {
         const res = await request(url)
             .then(data => data["quiz"])
             .then(data => {
-                console.log(data)
+                return [...data["main"], ...data["b1"], ...data["b2"]]
             })
         return res;
     }
     const getBranch = async(branch = "main") => {
+        const res = await request(url)
+            .then(data => data["quiz"])
+            .then(data => {
 
+                return data[branch]
+            })
+        return res;
     }
-    const getQ = async (id) => {
+    const getQ = async (id, branch = "main") => {
         // clearError();
         const res =
             await request(url)
                 .then(data => data["quiz"])
                 .then(data => {
-                    if(id < data[0].length){
-                        return data[0][id]
+                    if(id < data["main"].length){
+                        return data["main"][id]
                     }else return data[id]
                 })
 
         return res;
     }
-    const getLength =async () => {
+    const getLength =async (branch = "main") => {
         const res = await request(url).then(data => {
-            return data["quiz"]["length"]
+            return data["quiz"][branch]["length"]
 
         });
         return res;
@@ -64,5 +70,5 @@ export const dataService = () => {
 
     }
     // const
-    return {error, loading, clearError, getQ, _getLabels, getLength}
+    return {error, loading, clearError, _getLabels, getLength, getBranch}
 }

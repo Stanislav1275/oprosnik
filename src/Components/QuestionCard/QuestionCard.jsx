@@ -39,33 +39,11 @@ const useStyles = makeStyles({
 });
 
 
-let QuestionCard = ({setCur, cur}) => {
+let QuestionCard = ({installBranch, quizList, setQuizList, setCur, cur}) => {
     const {loading, error, getQ, getLength} = dataService();
     const [isReady, setIsReady] = useState(false);
     const nextRef = useRef(null);
     const prevRef = useRef(null);
-    const [question, setQuestion] = useState("");
-    const [answers, setAnswers] = useState([]);
-    const [rate, setRate] = useState([]);
-    const [categories, setCategories] = useState("");
-    const [rate_prof, setRate_Prof] = useState([]);
-    const [lengthData, setLengthData] = useState(0);
-    useEffect(() => {
-        getLength().then(setLengthData)
-    }, [])
-    useEffect(() => {
-        questionReq()
-    }, [cur])
-    const questionReq = () => {
-        getQ(cur)
-            .then(q => {
-                setCategories(q["categories"]);
-                setQuestion(q["question"]);
-                setAnswers(q["answers"]);
-                setRate(q["rate"]);
-                setRate_Prof(q["rate_prof"]);
-        })
-    }
     const classes = useStyles();
 
     const nextHandler = () => {
@@ -82,10 +60,10 @@ let QuestionCard = ({setCur, cur}) => {
             setCur(prevCur => prevCur - 1);
     }
 //
-    const spinner = (loading && !error) ? <Spinner/> : null;
+    const spinner = ((loading && !error) || (!quizList.length && !error)) ? <Spinner/> : null;
     const errorMesage = (error)?<ErrorMessage/>:null;
-    const content = (!loading && !error) ?
-        <View setIsReady={setIsReady} question={question} answers={answers} classes={classes}/> : null;
+    const content = (!loading && !error && quizList.length) ?
+        <View setIsReady={setIsReady} question={quizList[cur]?.question} answers={quizList[cur]?.answers} classes={classes}/> : null;
     return (
         <Card
              className = {classes.root}>
@@ -108,7 +86,7 @@ let QuestionCard = ({setCur, cur}) => {
                         Сбросить/Начать
                     </Button>
                     <Button
-                        disabled={(cur >= lengthData - 1 || loading) || !isReady}
+                        disabled={(cur >= quizList.length - 1 || loading) || !isReady}
                         ref={nextRef}
                         onClick={nextHandler}
                         size="small" color="primary">
