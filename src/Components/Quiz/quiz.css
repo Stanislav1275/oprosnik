@@ -1,0 +1,10 @@
+.quiz {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+/*# sourceMappingURL=quiz.css.map */
