@@ -7,6 +7,7 @@ export class ErrorBoundery extends Component {
     }
 
     static getDerivedStateFromError() {
+        localStorage.clear()
         // Update state so the next render will show the fallback UI.
         return {error: true};
     }

@@ -39,19 +39,39 @@ const useStyles = makeStyles({
 });
 
 
-let QuestionCard = ({installBranch, quizList, setQuizList, setCur, cur}) => {
-    const {loading, error, getQ, getLength} = dataService();
+let QuestionCard = ({setChecks, checks, loadingP,mainLength, installBranch, quizList, setCur, cur, setQuizList}) => {
+    const {loading, error} = dataService();
+    const [newBranchLoading, setNewBranchLoading] = useState(false);
     const [isReady, setIsReady] = useState(false);
+    const [isEnded, setIsEnded] = useState(false);
+    // const [selectedId, setSelectedId] = useState(null);
     const nextRef = useRef(null);
     const prevRef = useRef(null);
     const classes = useStyles();
+    const nextState = useMemo(() => {
+        return  cur === mainLength - 1?'следующий этап':cur === quizList.length - 1?"закончить":"следующий";
 
+    }, [cur, mainLength]);
+    useEffect(() =>  {
+        if(cur === mainLength - 1){
+            installBranch("it");
+        }
+        // if(cur )
+        // setIsEnded()
+        // (cur >= quizList.length - 1 || loading) || !isReady
+        // setIsEnded((cur >= quizList.length - 1);
+    }, [cur])
+
+    useEffect(() => {
+        if(error) localStorage.clear()
+    },[error])
     const nextHandler = () => {
         setCur(prevCur => prevCur + 1);
         setIsReady(false)
     }
     const reset = () => {
-        localStorage.clear();
+
+        localStorage.setItem("main", JSON.stringify([]));
         setCur(0);
     }
 
@@ -60,14 +80,14 @@ let QuestionCard = ({installBranch, quizList, setQuizList, setCur, cur}) => {
             setCur(prevCur => prevCur - 1);
     }
 //
-    const spinner = ((loading && !error) || (!quizList.length && !error)) ? <Spinner/> : null;
-    const errorMesage = (error)?<ErrorMessage/>:null;
+    const spinner = ((loadingP && !quizList?.length)|| (loading && !error) || (!quizList?.length && !error)) ? <Spinner/> : null;
+    const errorMessage = (error)?<ErrorMessage/>:null;
     const content = (!loading && !error && quizList.length) ?
-        <View setIsReady={setIsReady} question={quizList[cur]?.question} answers={quizList[cur]?.answers} classes={classes}/> : null;
+        <View  cur={cur} selectedId={checks[cur]} setIsReady={setIsReady} question={quizList[cur]?.question} answers={quizList[cur]?.answers} classes={classes}/> : null;
     return (
         <Card
              className = {classes.root}>
-            {errorMesage}
+            {errorMessage}
             {spinner}
             {content}
             <CardActions>
@@ -86,11 +106,11 @@ let QuestionCard = ({installBranch, quizList, setQuizList, setCur, cur}) => {
                         Сбросить/Начать
                     </Button>
                     <Button
-                        disabled={(cur >= quizList.length - 1 || loading) || !isReady}
+                        disabled={((cur >= quizList.length || loading || !isReady))}
                         ref={nextRef}
                         onClick={nextHandler}
                         size="small" color="primary">
-                        Следующий
+                        {nextState}
                     </Button>
                 </Box>
             </CardActions>
@@ -98,16 +118,15 @@ let QuestionCard = ({installBranch, quizList, setQuizList, setCur, cur}) => {
     )
 
 }
-const View = ({question, answers, classes, setIsReady}) => {
-    useEffect(() => {
-    }, [])
+const View = ({selectedId, question, answers, classes, setIsReady, cur}) => {
+
     let answersElements =
         <CardContent className = {classes.answers}>
 
             <FormControl component="fieldset">
                 <FormLabel className={classes.question} component="legend">{question}</FormLabel>
 
-                <LimitedFormGroup  setIsReady = {setIsReady} classes = {classes.limited} labels={answers}/>
+                <LimitedFormGroup selectedId={selectedId} cur = {cur} setIsReady = {setIsReady} classes = {classes.limited} labels={answers}/>
 
             </FormControl>
 
