@@ -55,6 +55,7 @@ export const Quiz = () => {
     // const spinner = (loading)
     return (
         <div className="quiz">
+            fssdf
             {/*<QuestionCard setChecks = {setChecks} checks = {checks} loadingP = {loading} installBranch = {installBranch}  mainLength={mainLength} quizList={quizList} cur={cur}*/}
             {/*              setCur={setCur}/>*/}
         </div>
