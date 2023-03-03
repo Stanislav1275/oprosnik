@@ -29,11 +29,14 @@ export const Quiz = () => {
     useEffect(() => {
         if (localStorage.getItem("main") == null) {
             localStorage.setItem("main", JSON.stringify([]))
+        }else {
+            let m = JSON.parse(localStorage.getItem('main'));
+            if(m){
+                setChecks(m);
+            }
+
         }
-        let m = JSON.parse(localStorage.getItem('main'));
-        if(m){
-            setChecks(prev => [...prev, ...m]);
-        }
+
     }, [])
 
     useEffect(() => {
@@ -52,7 +55,7 @@ export const Quiz = () => {
     // const spinner = (loading)
     return (
         <div className="quiz">
-            <QuestionCard setChecks = {setChecks} checks = {checks} loadingP = {loading} installBranch = {installBranch} setQuizList={setQuizList} mainLength={mainLength} quizList={quizList} cur={cur}
+            <QuestionCard setChecks = {setChecks} checks = {checks} loadingP = {loading} installBranch = {installBranch}  mainLength={mainLength} quizList={quizList} cur={cur}
                           setCur={setCur}/>
         </div>
     );

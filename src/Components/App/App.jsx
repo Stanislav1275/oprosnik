@@ -4,7 +4,7 @@ import {Quiz} from "../Quiz/Quiz.jsx";
 import {dataService} from "../../service/dataService.js";
 import {ErrorBoundery} from "../ErrorBoundery/ErrorBoundery.jsx";
 
-function App(props) {
+function App() {
 
     return (
         <div className="App">
