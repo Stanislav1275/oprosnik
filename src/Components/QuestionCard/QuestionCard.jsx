@@ -57,7 +57,6 @@ let QuestionCard = ({setChecks, checks, loadingP,mainLength, installBranch, quiz
             installBranch("it");
         }
         // if(cur )
-        // setIsEnded()
         // (cur >= quizList.length - 1 || loading) || !isReady
         // setIsEnded((cur >= quizList.length - 1);
     }, [cur])
