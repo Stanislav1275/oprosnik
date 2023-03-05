@@ -13,16 +13,11 @@ export const dataService = () => {
             })
         return res;
     }
-    const getAllQuestions =async  () => {
-        // clearError();
-        const res = await request(url)
-            .then(data => data["quiz"])
-            .then(data => {
-                return [...data["main"], ...data["b1"], ...data["b2"]]
-            })
-        return res;
+    const finishQuiz = () => {
+
     }
-    const getBranch = async(branch = "main") => {
+
+    const getBranch = async (branch = "main") => {
         const res = await request(url)
             .then(data => data["quiz"])
             .then(data => {
@@ -32,38 +27,51 @@ export const dataService = () => {
         return res;
     }
 
-    const getLength =async (branch = "main") => {
+    const getLength = async (branch = "main") => {
         const res = await request(url).then(data => {
             return data["quiz"][branch]["length"]
 
         });
         return res;
     }
-    const calculateQuestion = async (branch) => {
-        // clearError();
-        let main = "main";
-        const res = await request(url)
-            .then(data => {
-                main.forEach((m, index) => {
-                    window[data["quiz"][branch][index]["rate_prof"][m]] += data["quiz"][0][index]["rate"][index]
-                })
 
-
-            })
-        return res;
-
-    }
-    const calculateBranch = async() => {
-        const res = await request(url)
+    const calculateBranchFromMain = async (answers) => {
+        const branches = await request(url)
             .then(data => data["branches"])
-            .then(labels => {
-                let max = labels[0];
-                for(let label of labels) {
-                    if(window.label > max) max = window.label;
+        const res = await request(url)
+            .then(data => data["quiz"]["main"])
+            .then(main => {
+                for (let i = 0; i < main.length; i++) {
+                    let mainEl = main[i];
+                    let ansEl = answers[i];
+                    // console.log(mainEl["rate_prof"][ansEl])
+                    // console.log(ansEl)
+                    let rateArr = [];
+                    if (mainEl["rate_prof"].length > 1) {
+                        rateArr = mainEl["rate_prof"][ansEl];
+                        for (let rate of rateArr) {
+                            window[rate] += mainEl["rate"][ansEl];
+                        }
+                    } else {
+                        rateArr = mainEl["rate_prof"][0];
+
+                        window[rateArr[ansEl]] += mainEl["rate"][ansEl];
+                    }
+
 
                 }
-                return max;
+                let maxCount = window[branches[0]];
+                let maxBranch = branches[0];
+                for (let branch of branches) {
+                    if (window[branch] > maxCount) {
+                        maxCount = window[branch];
+                        maxBranch = branch;
+                    }
+                }
+                localStorage.setItem("branch", maxBranch);
+                return maxBranch;
             })
+
         return res;
     }
     const putAnswers = () => {
@@ -73,5 +81,5 @@ export const dataService = () => {
 
     }
     // const
-    return {error, loading, clearError, _getLabels, getLength, getBranch}
+    return {error, loading, clearError, _getLabels, getLength, getBranch, calculateBranchFromMain}
 }

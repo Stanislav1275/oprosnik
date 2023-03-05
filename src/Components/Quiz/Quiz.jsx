@@ -6,7 +6,7 @@ import ErrorMessage from "../errorMessage/ErrorMesage.jsx";
 import "../Quiz/quiz.scss"
 
 export const Quiz = () => {
-    const {loading, error, _getLabels, getBranch, getLength} = dataService();
+    const {loading, error, _getLabels, getBranch, getLength, calculateBranchFromMain} = dataService();
     let  [quizList, setQuizList] = useState([]);
     const [mainLength, setMainLength] = useState(0);
     const [checks, setChecks] = useState([]);
@@ -17,6 +17,7 @@ export const Quiz = () => {
     const [cur, setCur] = useState(() => {
         return (localStorage.getItem("cur") == null) ? 0 : +localStorage.getItem("cur")
     });
+
     useEffect(() => {
         _getLabels()
             .then(labels => {
@@ -27,7 +28,7 @@ export const Quiz = () => {
 
     }, [])
     useEffect(() => {
-        if (localStorage.getItem("main") == null) {
+        if (localStorage.getItem("main") === null) {
             localStorage.setItem("main", JSON.stringify([]))
         }else {
             let m = JSON.parse(localStorage.getItem('main'));
@@ -36,28 +37,36 @@ export const Quiz = () => {
             }
 
         }
+            installBranch()//main
+            if(localStorage.getItem("branch") !== 'head'){
+                calculateBranchFromMain(JSON.parse(localStorage.getItem("main")))
+                    .then(installBranch)
+            }
 
     }, [])
 
     useEffect(() => {
         localStorage.setItem("cur", JSON.stringify(cur));
     }, [cur])
-
-    useEffect(() => {
-        installBranch()
-    }, [])
-
     const installBranch =  (branch = "main") => {
         getBranch(branch).then(data =>
             setQuizList(prev => [...prev, ...data])
         );
     }
+
     // const spinner = (loading)
     return (
         <div className="quiz">
-            fssdf
-            {/*<QuestionCard setChecks = {setChecks} checks = {checks} loadingP = {loading} installBranch = {installBranch}  mainLength={mainLength} quizList={quizList} cur={cur}*/}
-            {/*              setCur={setCur}/>*/}
+            <QuestionCard
+                setQuizList={setQuizList}
+                setChecks = {setChecks}
+                checks = {checks}
+                loadingP = {loading}
+                installBranch = {installBranch}
+                mainLength={mainLength}
+                quizList={quizList}
+                cur={cur}
+                setCur={setCur}/>
         </div>
     );
 }

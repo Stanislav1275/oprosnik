@@ -6,46 +6,42 @@ import {
 } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 
-export const LimitedFormGroup = ({selectedId, checks, cur, setIsReady, labels, classes}) => {
+export const LimitedFormGroup = ({setSelectedId, selectedId, cur, setIsReady, labels, classes}) => {
 
     const isChecked = (indexA) => {
         return indexA === JSON.parse(localStorage?.getItem("main"))
     }
-    const getChangedQuizListFromLS = async (id) => {
-        let quizList = await JSON.parse(
+    const saveChecksToLS = (id, cur = cur) => {
+        let quizList = JSON.parse(
             localStorage.getItem("main")//...also branches
         )
         quizList[cur] = id;
+        localStorage.setItem("main", JSON.stringify(quizList));
         return quizList;
 
-        // await localStorage.setItem("main", JSON.stringify(quizList) );
 
     }
+
     let elements;
     elements =
         // useMemo(() =>
         labels?.map((label, index) => {
             setTimeout(() => {
-                setIsReady(true);
-
-            },0)
+                if(selectedId !== undefined){
+                    setIsReady(true);
+                }
+            }, 0)
 
             return (
                 <FormControlLabel
                 onClick={(e) => {
-                    console.log(selectedId)
-                    getChangedQuizListFromLS(index)
-                        .then(data => {
-                            localStorage.setItem("main", JSON.stringify(data))
-                        });
+                    setSelectedId(index, cur)
+                    saveChecksToLS(index, cur);
                 }}
-                // checked={index === JSON.parse(localStorage.getItem("main"))[cur]}
+                checked={index === selectedId}
                 key={index}
 
-                control={<Radio  onClick={() => {
-                    // console.log(2)
-                }
-                }/>}
+                control={<Radio/>}
                 label={label}
                 value={label}
                 />)

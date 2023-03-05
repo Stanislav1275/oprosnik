@@ -15,77 +15,107 @@ import Skeleton from "../skeleton/Skeleton.jsx";
 import ErrorMessage from "../errorMessage/ErrorMesage.jsx";
 import skeleton from "../skeleton/Skeleton.jsx";
 import {ErrorBoundery} from "../ErrorBoundery/ErrorBoundery.jsx";
+import {DynamicQuestionComponent} from "../DynamicAnswersComponent/DynymicQuestionComponent.jsx";
 
 const useStyles = makeStyles({
     root: {
-        marginTop:10,
-        minHeight:400,
+        marginTop: 10,
+        minHeight: 400,
         width: 400,
     },
     media: {
         height: 300,
     },
-    answers:{
+    answers: {
 
-        display:"flex",
-        flexDirection:"column",
-        justifyContent:"center",
-        minHeight:250,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        minHeight: 250,
     },
-    limited:{
-    },
-    question:{
-    }
+    limited: {},
+    question: {}
 });
 
 
-let QuestionCard = ({setChecks, checks, loadingP,mainLength, installBranch, quizList, setCur, cur, setQuizList}) => {
-    const {loading, error} = dataService();
+let QuestionCard = ({setChecks, checks, loadingP, mainLength, installBranch, quizList, setCur, cur, setQuizList}) => {
+    const {loading, error, calculateBranchFromMain, _getLabels} = dataService();
     const [newBranchLoading, setNewBranchLoading] = useState(false);
     const [isReady, setIsReady] = useState(false);
     const [isEnded, setIsEnded] = useState(false);
-    // const [selectedId, setSelectedId] = useState(null);
     const nextRef = useRef(null);
     const prevRef = useRef(null);
     const classes = useStyles();
     const nextState = useMemo(() => {
-        return  cur === mainLength - 1?'следующий этап':cur === quizList.length - 1?"закончить":"следующий";
+        return cur === mainLength - 1 ? 'следующий этап' : cur === quizList.length - 1 ? "закончить" : "следующий";
 
     }, [cur, mainLength]);
-    useEffect(() =>  {
-        if(cur === mainLength - 1){
-            installBranch("it");
-        }
-        // if(cur )
-        // (cur >= quizList.length - 1 || loading) || !isReady
-        // setIsEnded((cur >= quizList.length - 1);
-    }, [cur])
 
     useEffect(() => {
-        if(error) localStorage.clear()
-    },[error])
+        if (error) localStorage.clear()
+    }, [error])
     const nextHandler = () => {
+        if (nextState === 'следующий этап' && localStorage.getItem("branch") === "head") {
+            if (quizList.length <= mainLength)
+                calculateBranchFromMain(checks)
+                    .then(branch => {
+                        installBranch(branch)
+                        localStorage.setItem("branch", branch);
+
+                    })
+        }
+        // console.log(nextState)
         setCur(prevCur => prevCur + 1);
         setIsReady(false)
     }
     const reset = () => {
 
         localStorage.setItem("main", JSON.stringify([]));
+        localStorage.setItem("cur", '0');
+        localStorage.setItem("branch", "head");
+        _getLabels()
+            .then(branches => {
+                branches.forEach(branch => {
+                    window[branch] = 0;
+                });
+            })
+        setChecks([]);
+        setQuizList(prev => prev.slice(0, mainLength))
+        setIsReady(false);
         setCur(0);
+        setIsEnded(prev => !prev)
     }
-
     const prevHandler = () => {
         if (cur > 0)
             setCur(prevCur => prevCur - 1);
     }
 //
-    const spinner = ((loadingP && !quizList?.length)|| (loading && !error) || (!quizList?.length && !error)) ? <Spinner/> : null;
-    const errorMessage = (error)?<ErrorMessage/>:null;
-    const content = (!loading && !error && quizList.length) ?
-        <View  cur={cur} selectedId={checks[cur]} setIsReady={setIsReady} question={quizList[cur]?.question} answers={quizList[cur]?.answers} classes={classes}/> : null;
+    let setCurIdInChecks = (id, cur) => {
+        setChecks(prev => {
+            let copy = [...prev];
+            copy[cur] = id;
+            return copy;
+        })
+    }
+    const spinner = (((loadingP && !quizList?.length) || (loading) || (!quizList?.length) || !quizList[cur]) && !error) ?
+        <Spinner/> : null;
+    const errorMessage = (error) ? <ErrorMessage/> : null;
+    const content = (!loading && !error && quizList.length !== 0 && quizList[cur]) ?
+        <DynamicQuestionComponent
+            cur={cur}
+            setIsReady={setIsReady}
+            selectedId={checks[cur]}
+            setSelectedId={(id, cur) => setCurIdInChecks(id, cur)}
+            question={quizList[cur].question}
+            answers={quizList[cur].answers}
+            classes={classes}
+
+        >
+
+        </DynamicQuestionComponent> : null;
     return (
         <Card
-             className = {classes.root}>
+            className={classes.root}>
             {errorMessage}
             {spinner}
             {content}
@@ -93,7 +123,7 @@ let QuestionCard = ({setChecks, checks, loadingP,mainLength, installBranch, quiz
                 <Box width={"100%"} display="flex" justifyContent="space-between">
                     <Button
                         ref={prevRef}
-                        disabled={cur <= 0  || loading}
+                        disabled={cur <= 0 || loading}
                         onClick={prevHandler}
                         size="small" color="primary">
                         Предыдущий
@@ -117,29 +147,5 @@ let QuestionCard = ({setChecks, checks, loadingP,mainLength, installBranch, quiz
     )
 
 }
-const View = ({selectedId, question, answers, classes, setIsReady, cur}) => {
 
-    let answersElements =
-        <CardContent className = {classes.answers}>
-
-            <FormControl component="fieldset">
-                <FormLabel className={classes.question} component="legend">{question}</FormLabel>
-
-                <LimitedFormGroup selectedId={selectedId} cur = {cur} setIsReady = {setIsReady} classes = {classes.limited} labels={answers}/>
-
-            </FormControl>
-
-        </CardContent>
-    return (
-        <CardActionArea>
-            <CardMedia
-                style={{"border":"1px cursor black"}}
-                className={classes.media}
-                image={questionMark}
-                title="Contemplative Reptile"
-            />
-            {answersElements}
-        </CardActionArea>
-    )
-}
 export default QuestionCard;

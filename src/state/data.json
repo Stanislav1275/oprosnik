@@ -17,8 +17,48 @@
         ],
         "categories": "head",
         "rate_prof": [
-          "tvor",
-          "it"
+          [
+            "tvor",
+            "it"
+          ]
+        ]
+      },
+      {
+        "question": "Выберите вариант",
+        "answers": [
+          "Программирование и смежные темы по типу моделирование и немного дизайна",
+          "Сухое программирование",
+          "Больше творчества",
+          "Управление it-проектами"
+        ],
+        "rate": [
+          10,
+          4,
+          10,
+          10
+
+        ],
+        "categories": "head",
+        "rate_prof": [
+          [
+            "pinf",
+            "it"
+          ],
+          [
+            "it",
+            "ifst",
+            "ivcht"
+
+          ],
+          [
+            "tvor",
+            "dizain"
+
+          ],
+          [
+            "it",
+            "pinj"
+          ]
         ]
       },
       {
@@ -40,6 +80,7 @@
             "ivcht",
             "reklama",
             "dizain"
+
           ],
           [
             "pinf",
@@ -357,7 +398,9 @@
     "pinj",
     "reklama",
     "dizain",
-    "tv"
+    "tv",
+    "ivcht"
+
   ],
   "descriptionsForDirections": [
     [
