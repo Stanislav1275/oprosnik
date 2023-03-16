@@ -1,0 +1,9 @@
+ul{
+    display: list-item;
+    list-style-type: circle;
+}
+li{
+    display: list-item;
+    list-style: disc;
+
+}

@@ -1,0 +1,22 @@
+@media screen and (max-width: 430px){
+    *{
+       font-size: 90%;
+    }
+}
+@media screen and (max-width: 390px){
+
+    .conclusion{
+        font-size: 1.1rem;
+
+    }
+
+}
+@media screen and (min-width: 1600px){
+    *{
+        font-size: 1.1rem;
+    }
+}
+
+img{
+    background-size: contain;
+}

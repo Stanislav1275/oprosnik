@@ -1,10 +1,6 @@
-import QuestionCard from "../QuestionCard/QuestionCard.jsx";
-import {useEffect, useState} from "react";
 import {Quiz} from "../Quiz/Quiz.jsx";
-import {dataService} from "../../service/dataService.js";
 import {ErrorBoundery} from "../ErrorBoundery/ErrorBoundery.jsx";
-import questionMark from "../../assets/image/question.jpg"
-
+import "../../index.css"
 function App() {
 
     return (

@@ -1,70 +1,104 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
-import questionMark from "../../assets/image/question.jpg"
 import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
 import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
-import {Box, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, setRef} from "@material-ui/core";
-import {LimitedFormGroup} from "../LimitedFormGroup/LimitedFormGroup.jsx";
+import {Box} from "@material-ui/core";
 import {dataService} from "../../service/dataService.js";
 import Spinner from "../spinner/Spinner.jsx";
-import Skeleton from "../skeleton/Skeleton.jsx";
 import ErrorMessage from "../errorMessage/ErrorMesage.jsx";
-import skeleton from "../skeleton/Skeleton.jsx";
-import {ErrorBoundery} from "../ErrorBoundery/ErrorBoundery.jsx";
 import {DynamicQuestionComponent} from "../DynamicAnswersComponent/DynymicQuestionComponent.jsx";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) =>({
     root: {
         marginTop: 10,
-        minHeight: 400,
-        width: 400,
+        [theme.breakpoints.down(600)]:{
+            width: "80%",
+            minHeight: 400
+        },
+        [theme.breakpoints.up(650)]:{
+            width: 400,
+
+            minHeight: 400
+        },
+        [theme.breakpoints.up(1700)]:{
+            minWidth: 500,
+            minHeight: 500
+        }
+
     },
     media: {
-        height: 300,
+        minHeight: 300,
+        width:"auto",
+        blockSize:"fit-content",
+        [theme.breakpoints.up(1900)]:{
+            minHeight: 500
+        }
+
     },
     answers: {
-
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
-        minHeight: 250,
+        // minHeight: 250,
     },
-    limited: {},
-    question: {}
-});
+    btns:{
+        [theme.breakpoints.down(340)]:{
+            flexDirection: "column"
+        }
+    }
+}));
 
 
-let QuestionCard = ({setChecks, checks, loadingP, mainLength, installBranch, quizList, setCur, cur, setQuizList}) => {
-    const {loading, error, calculateBranchFromMain, _getLabels} = dataService();
-    const [newBranchLoading, setNewBranchLoading] = useState(false);
+let QuestionCard = ({errorP, setChecks, checks, loadingP, mainLength, installBranch, quizList, setCur, cur, setQuizList}) => {
+    const {loading, error, calculateBranchFromMain, _getLabels, calculateDirection} = dataService();
+    const [isChanged, setIsChanged] = useState(false);
     const [isReady, setIsReady] = useState(false);
     const [isEnded, setIsEnded] = useState(false);
     const nextRef = useRef(null);
     const prevRef = useRef(null);
     const classes = useStyles();
-    const nextState = useMemo(() => {
-        return cur === mainLength - 1 ? 'следующий этап' : cur === quizList.length - 1 ? "закончить" : "следующий";
+    const isError = errorP || error;
+    const isLoading =/* useMemo (() => {
+        return*/ ((loadingP || loading || !quizList || !quizList?.length || !quizList[cur]) && !isError);
+    /*}, [loading, quizList, cur])*/
 
-    }, [cur, mainLength]);
+    const nextState = /*useMemo(() => {*/
+        /*return */cur === mainLength - 1 ? 'следующий этап' : cur === quizList.length - 1 ? "закончить" : "следующий";
+
+    // }, [cur, mainLength]);
 
     useEffect(() => {
         if (error) localStorage.clear()
     }, [error])
     const nextHandler = () => {
-        if (nextState === 'следующий этап' && localStorage.getItem("branch") === "head") {
-            if (quizList.length <= mainLength)
+        if (nextState === 'следующий этап' && localStorage.getItem("branch") === "head" || isChanged && nextState === 'следующий этап') {
+            // if (quizList.length <= mainLength) {
                 calculateBranchFromMain(checks)
-                    .then(branch => {
+                    .then(branch => {//!!тут говна поел ты
+                        if(isChanged)
+                            setChecks(prev => prev.slice(0, mainLength))
+
+                        setQuizList(prev => {
+                            return prev.slice(0, mainLength);
+                        })
                         installBranch(branch)
                         localStorage.setItem("branch", branch);
 
                     })
+                setIsEnded(false);
+                setIsChanged(false);
+            // }
+
         }
-        // console.log(nextState)
+        else if(nextState === "закончить"){
+            calculateDirection(checks.slice(mainLength), localStorage.getItem("branch"))
+                .then(() => {
+                })
+            setIsEnded(true);
+            setIsReady(false);
+            return;
+        }
         setCur(prevCur => prevCur + 1);
         setIsReady(false)
     }
@@ -83,11 +117,13 @@ let QuestionCard = ({setChecks, checks, loadingP, mainLength, installBranch, qui
         setQuizList(prev => prev.slice(0, mainLength))
         setIsReady(false);
         setCur(0);
-        setIsEnded(prev => !prev)
+        setIsEnded(false);
+        setIsChanged(false);
     }
     const prevHandler = () => {
         if (cur > 0)
             setCur(prevCur => prevCur - 1);
+        if(isEnded) setIsEnded(false);
     }
 //
     let setCurIdInChecks = (id, cur) => {
@@ -97,11 +133,13 @@ let QuestionCard = ({setChecks, checks, loadingP, mainLength, installBranch, qui
             return copy;
         })
     }
-    const spinner = (((loadingP && !quizList?.length) || (loading) || (!quizList?.length) || !quizList[cur]) && !error) ?
+    const spinner = isLoading ?
         <Spinner/> : null;
-    const errorMessage = (error) ? <ErrorMessage/> : null;
-    const content = (!loading && !error && quizList.length !== 0 && quizList[cur]) ?
+    const errorMessage = (isError) ? <ErrorMessage/> : null;
+    const content = (!isLoading && !isError && quizList[cur]["answers"] !== undefined) ?
         <DynamicQuestionComponent
+            setIsChanged = {setIsChanged}
+            isEnded={isEnded}
             cur={cur}
             setIsReady={setIsReady}
             selectedId={checks[cur]}
@@ -120,10 +158,11 @@ let QuestionCard = ({setChecks, checks, loadingP, mainLength, installBranch, qui
             {spinner}
             {content}
             <CardActions>
-                <Box width={"100%"} display="flex" justifyContent="space-between">
+                <Box  width={"100%"} className={classes.btns} display="flex" justifyContent="space-between">
                     <Button
+
                         ref={prevRef}
-                        disabled={cur <= 0 || loading}
+                        disabled={cur <= 0 || isLoading}//какая-то беда с useMemo(isLoading)
                         onClick={prevHandler}
                         size="small" color="primary">
                         Предыдущий
@@ -135,7 +174,7 @@ let QuestionCard = ({setChecks, checks, loadingP, mainLength, installBranch, qui
                         Сбросить/Начать
                     </Button>
                     <Button
-                        disabled={((cur >= quizList.length || loading || !isReady))}
+                        disabled={((cur >= quizList.length || isLoading || !isReady))}
                         ref={nextRef}
                         onClick={nextHandler}
                         size="small" color="primary">

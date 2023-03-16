@@ -6,11 +6,9 @@ import {
 } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 
-export const LimitedFormGroup = ({setSelectedId, selectedId, cur, setIsReady, labels, classes}) => {
+export const LimitedFormGroup = ({setIsChanged, setSelectedId, selectedId, cur, setIsReady, labels, classes}) => {
 
-    const isChecked = (indexA) => {
-        return indexA === JSON.parse(localStorage?.getItem("main"))
-    }
+
     const saveChecksToLS = (id, cur = cur) => {
         let quizList = JSON.parse(
             localStorage.getItem("main")//...also branches
@@ -24,7 +22,6 @@ export const LimitedFormGroup = ({setSelectedId, selectedId, cur, setIsReady, la
 
     let elements;
     elements =
-        // useMemo(() =>
         labels?.map((label, index) => {
             setTimeout(() => {
                 if(selectedId !== undefined){
@@ -34,16 +31,17 @@ export const LimitedFormGroup = ({setSelectedId, selectedId, cur, setIsReady, la
 
             return (
                 <FormControlLabel
-                onClick={(e) => {
-                    setSelectedId(index, cur)
-                    saveChecksToLS(index, cur);
-                }}
-                checked={index === selectedId}
-                key={index}
+                    onClick={() => {
+                        setIsChanged(true);
+                        setSelectedId(index, cur)
+                        saveChecksToLS(index, cur);
+                    }}
+                    checked={index === selectedId}
+                    key={index}
 
-                control={<Radio/>}
-                label={label}
-                value={label}
+                    control={<Radio/>}
+                    label={label}
+                    value={label}
                 />)
         })
     return (
@@ -53,7 +51,3 @@ export const LimitedFormGroup = ({setSelectedId, selectedId, cur, setIsReady, la
         </RadioGroup>
     );
 }
-
-// LimitedFormGroup.propsType = {
-//     labels: PropTypes.objectOf(PropTypes.string)
-// }
